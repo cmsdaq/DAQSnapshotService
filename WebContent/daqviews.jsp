@@ -3,6 +3,8 @@
     %>
 <%@ page import="utils.SetupManager"%>
 <%@ page import="utils.DAQSetup"%>
+<%@ page import="javax.servlet.jsp.PageContext"%>
+<%@ page import="javax.servlet.jsp.JspException"%>
     
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -18,6 +20,7 @@
 
 	SetupManager setupManager  = (SetupManager)getServletContext().getAttribute("setupManager");
 	String baseLink = (String)getServletContext().getAttribute("linktodaqview");
+
 %>
 
 <body bgcolor="#DDDDAA">
@@ -25,8 +28,8 @@
 
 <br><br>
 
-<table width="75%">
-<tr><th>Setup</th><th>Remark</th><th>DAQAggr. status</th><th>Last DAQAggr. pid</th><th>Action</th><th>Snapshot DU<th>Link</th></tr>
+<table width="95%">
+<tr><th>Setup</th><th>Remark</th><th>DAQAggr. status</th><th>Last DAQAggr. pid</th><th>Action</th><th>Snapshot DU<th>Link</th><th>Notes</th></tr>
 
 <% 
 
@@ -35,7 +38,7 @@
 //loop over all setups: sets values based on each DAQSetup and introduces a new row, where applicable (each row is linked to a daqview for a specific setup)
 boolean evenRow = true; //first row of table is considered "index 0", therefore even
 String rowColor = "#DDDDBB";
-for (DAQSetup ds: setupManager.getAllSetups()){
+for (DAQSetup ds: setupManager.getAvailableSetups()){
 	
 	String statusMsg = "";
 	String link_all = "";
@@ -44,6 +47,7 @@ for (DAQSetup ds: setupManager.getAllSetups()){
 	String links = ""; //concatenation of all links with line breakers
 	String pidAsString = "";
 	String buttonTag = "start";
+	String notes = "";
 	
 	if (!ds.isSetupConfigFileDeclared()){
 		//someone has removed DAQAggregator config file after putting it, breaking the pointer to any real-time or historical snapshots
@@ -60,21 +64,39 @@ for (DAQSetup ds: setupManager.getAllSetups()){
 			link_all = "N/A";
 			links = link_all;
 			pidAsString = "N/A";
+			
+			if (ds.getDiskUsage() == null){
+				notes = "No snapshot data found: expected, as this setup has never run";
+			}
+
 		}else{
 			pidAsString = String.valueOf(ds.getLastPid());
 			if (ds.isSetupRunning()){
 				statusMsg = "running";
 				buttonTag = "stop";
-				link_all = "<a href=\""+baseLink+"index.html?setup="+ds.getName()+"\">Realtime DAQView - all</a>";
-				link_fb = "<a href=\""+baseLink+"index_fb.html?setup="+ds.getName()+"\">Realtime DAQView - fb</a>";
-				link_fff = "<a href=\""+baseLink+"index_fff.html?setup="+ds.getName()+"\">Realtime DAQView - fff</a>";
+				link_all = "<a href=\""+baseLink+"index.html?setup="+ds.getName()+"\">DAQView - all</a>";
+				link_fb = "<a href=\""+baseLink+"index_fb.html?setup="+ds.getName()+"\">DAQView - fb</a>";
+				link_fff = "<a href=\""+baseLink+"index_fff.html?setup="+ds.getName()+"\">DAQView - fff</a>";
 				links = link_all+"<br/>"+link_fb+"<br/>"+link_fff;
+				if (ds.getDiskUsage() == null){
+					//in this case do not hide DAQView links, as it may be just the du command who took longer and data might exist (might happen at startup, when the snapshot dir is already huge)
+					notes = "Running but no snapshot data seem to have been produced yet: be patient if you just started it, otherwise investigate DAQAggregator logs";
+				}else{
+					notes = "Realtime views";
+				}
 			}else{
 				statusMsg = "stopped";
-				link_all = "<a href=\""+baseLink+"index.html?setup="+ds.getName()+"\">Stale DAQView - all</a>";
-				link_fb = "<a href=\""+baseLink+"index_fb.html?setup="+ds.getName()+"\">Stale DAQView - fb</a>";
-				link_fff = "<a href=\""+baseLink+"index_fff.html?setup="+ds.getName()+"\">Stale DAQView - fff</a>";
+				link_all = "<a href=\""+baseLink+"index.html?setup="+ds.getName()+"\">DAQView - all</a>";
+				link_fb = "<a href=\""+baseLink+"index_fb.html?setup="+ds.getName()+"\">DAQView - fb</a>";
+				link_fff = "<a href=\""+baseLink+"index_fff.html?setup="+ds.getName()+"\">DAQView - fff</a>";
 				links = link_all+"<br/>"+link_fb+"<br/>"+link_fff;
+				
+				if (ds.getDiskUsage() == null){
+					//in this case do not hide DAQView links, as it may be just the du command who took longer and data might exist (might happen at startup, when the snapshot dir is already huge)
+					notes = "Has run in the past, but no snapshot data seem to have been produced";
+				}else{
+					notes = "Not running anymore, but DAQView can still be used to go back in time";
+				}
 			}
 		}
 		if (evenRow){
@@ -88,17 +110,18 @@ for (DAQSetup ds: setupManager.getAllSetups()){
 	}
 %>
 
-<!--  <form method="post" action="" enctype="multipart/form-data"> -->
+
 <tr align="center" bgcolor="<%=rowColor%>" height=30>
 <td><%=ds.getName()%></td>
 <td><%=ds.getRemark()%></td>
 <td><%=statusMsg%></td>
 <td><%=pidAsString%></td>
-<td><input type="hidden" name="cdaq" value="1"  /><input type="submit" name="submit" value="<%=buttonTag%>" /></td>
-<td><%=ds.getDiskUsage()%></td>
+<td><form method="post" action="${pageContext.request.contextPath}/managesetup"><input type="submit" name="click_<%=ds.getName()%>" value="<%=buttonTag%>" /></form></td>
+<td><%=ds.getDiskUsage() != null ? ds.getDiskUsage() : "N/A"%></td>
 <td><%=links%></td>
+<td width = "15%"><%=notes%></td>
 </tr>
-<!-- </form> -->
+
 
   <% 
         } //end loop over all setups

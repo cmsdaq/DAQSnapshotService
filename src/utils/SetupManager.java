@@ -25,9 +25,9 @@ public class SetupManager{
 
 	/**holds setups by *normalized* name
 	 */
-	private Map<String, DAQSetup> setups; //it only makes sense to flush this map if we want to flush historical data for a setup
+	private Map<String, DAQSetup> setups; //never flush this map
 
-	private String configFilesDirPath;
+	private String configFilesDirPath; //this is the DAQAggregator config file
 
 	private String pidLogFile;
 
@@ -38,7 +38,7 @@ public class SetupManager{
 	private static final Logger logger = Logger.getLogger(SetupManager.class);
 
 
-	public SetupManager (String configFilesDirPath, String pidLogFile, String serverPropertiesFile){
+	public SetupManager (String configFilesDirPath, String pidLogFile){
 		this.configFilesDirPath = configFilesDirPath;
 		this.pidLogFile = pidLogFile;
 		setups = new HashMap<String, DAQSetup>();
@@ -58,21 +58,14 @@ public class SetupManager{
 				this.maskedSetups.add(sName);
 			}
 		}
-		
+
+		//setting masking property for all setups
 		for (String sName : this.setups.keySet()){
 			if (this.maskedSetups.contains(sName)){
 				this.setups.get(sName).setMasked(true);
 			}else{
 				this.setups.get(sName).setMasked(false);
 			}
-		}
-	}
-
-	/**Flushes setup masked value*/
-	private void flushSetupMasking(){
-
-		for (String sName : this.setups.keySet()){
-			this.setups.get(sName).setMasked(false);
 		}
 	}
 
@@ -105,7 +98,7 @@ public class SetupManager{
 
 					//still valid setup revisited
 					this.revisitedSetups.add(setupName);
-
+					
 					if (this.setups.containsKey(setupName)){
 						//do not add a new DAQSetup object, if already existing, only update, if applicable
 
@@ -122,10 +115,10 @@ public class SetupManager{
 						DAQSetup daqSetup = new DAQSetup(setupName);
 						daqSetup.setSnapshotPath(setupSnapshotPath);
 						daqSetup.setRemark(setupRemark);
-						daqSetup.setDiskUsage(queryDiskUsage(setupSnapshotPath));
 
 						this.setups.put(setupName, daqSetup);
 					}
+
 				}
 
 			}else{
@@ -138,14 +131,14 @@ public class SetupManager{
 		}
 	}
 
-	private void updateDiskUsage(){
+	public void updateDiskUsage(){
 		for (Map.Entry<String, DAQSetup> setupEntry: this.setups.entrySet()){
 			setupEntry.getValue().setDiskUsage(queryDiskUsage(setupEntry.getValue().getSnapshotPath()));
 		}
 	}
 
 	private String queryDiskUsage(String setupSnapshotPath) {
-		String ret = "";
+		String ret;
 
 		try {
 			Process p = Runtime.getRuntime().exec("du -sh "+setupSnapshotPath);
@@ -160,8 +153,14 @@ public class SetupManager{
 
 			ips.close();
 
+			
 			ret = pInfo.split("/")[0].trim();
-
+			
+			//a valid du response contains at least one char for the quantity and one char for the units
+			if (ret.length()<2){
+				ret = null;
+			}
+			
 
 		}catch(IOException e){
 			ret = "?";
@@ -228,7 +227,7 @@ public class SetupManager{
 	}
 
 	/**Method for listing of all setups, irrespectively of status*/
-	public List<DAQSetup> getAllSetups(){
+	public List<DAQSetup> getAvailableSetups(){
 		List<DAQSetup> list = new ArrayList<DAQSetup>();
 		for (String sName : this.setups.keySet()){
 			list.add(this.setups.get(sName));
@@ -246,14 +245,14 @@ public class SetupManager{
 		}
 	}
 
-	public String getSetupInfoString(){
+	private String getSetupInfoString(){
 		String ret = "";
 
 		ret+="*Setups discovered at "+(new Date()).toString()+"*\n";
 		ret+="---------------------------------------\n";
 		ret+="Setup name \t\t\t\t Last DAQAgg PID \t\t\t\t Last DAQAgg status \t\t\t\t Link to source\n\n";
 
-		for (DAQSetup ds : getAllSetups()){
+		for (DAQSetup ds : getAvailableSetups()){
 			ret+=ds.getName()+"\t\t\t\t"+ds.getLastPid()+"\t\t\t\t"+ds.getProcessStatus()+"\t\t\t\t"+ds.getSnapshotPath()+"\n";
 		}
 
@@ -262,18 +261,49 @@ public class SetupManager{
 		return ret;
 	}
 
-	public boolean startSetup(String name){
+	public boolean startSetupByName(String name){
+		logger.info("Starting setup: "+name);
 		boolean success = false;
 		//get daq, file and start it
+		
+		String DAQAggregatorBinary = "";
 
+		//do checks before
+		
+		//do something with Aggregator's log and err outputs
 
+		//replace script logic with servlet code!
+		
+		
+		
+		try{
+			Process p = Runtime.getRuntime().exec("sh /usr/mvougiou/monitoring_pro/DaqAggScript.sh Feb17 "+name);
+
+			logger.info("Started setup: "+name);
+		}catch(RuntimeException|IOException e){
+			logger.error("Failed to start a setup");
+			e.printStackTrace();
+		}
+		
 		return success;
 	}
 
-	public boolean stopSetup(String name   ){
+	public boolean stopSetupByName(String name){
+		logger.info("Stopping setup: "+name);
 		boolean success = false;
 
+		//do checks before!
+		
 
+		try{
+			Process p = Runtime.getRuntime().exec("kill "+this.setups.get(name).getLastPid());
+
+			logger.info("Stopped setup: "+name);
+
+		}catch(RuntimeException|IOException e){
+			logger.error("Failed to stop a setup");
+			e.printStackTrace();
+		}
 
 		return success;
 	}

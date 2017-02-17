@@ -33,7 +33,12 @@ import utils.SetupManager;
 
 @WebServlet("/getsnapshot")
 public class SnapshotAPI extends HttpServlet {
-	private static final long serialVersionUID = 1L;
+	
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4707199804021139531L;
 
 	private static final Logger logger = Logger.getLogger(SnapshotAPI.class);
 

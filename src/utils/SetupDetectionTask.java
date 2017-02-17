@@ -21,6 +21,10 @@ public class SetupDetectionTask implements Runnable{
 	@Override
 	public void run() {
 		setupDetector.detectSetups();
+		
+		setupDetector.updateDiskUsage(); /*TODO:MOVE THIS TO A SEPARATE TASK FOR PRODUCTION*/
+		
+		
 		logger.debug("Setup detection task finished");
 	}
 }

@@ -32,7 +32,7 @@ public class ContextListener implements javax.servlet.ServletContextListener{
 		
 		try{
 		
-		//load props at startup
+		//load server props at startup (be careful: these are NOT the DAQAggregator properties)
 		Properties properties = Helpers.loadProps(webAppConfigurationPath);
 		
 		
@@ -45,16 +45,20 @@ public class ContextListener implements javax.servlet.ServletContextListener{
 		
 				
 		//must also pass properties file containing masked setups, as these can change during one server execution, therefore file will be checked periodically
-		SetupManager setupManager = new SetupManager(daqAggregatorConfigFilesDirPath,daqAggregatorPidLogFile, webAppConfigurationPath);
+		SetupManager setupManager = new SetupManager(daqAggregatorConfigFilesDirPath,daqAggregatorPidLogFile);
 		
 
 		//register to global scope
 		event.getServletContext().setAttribute("setupManager", setupManager);
 		event.getServletContext().setAttribute("linktodaqview", linkToDaqviewApache);
 
-		//schedule setup detection task (once every 10s)
+		
 		scheduler = Executors.newSingleThreadScheduledExecutor();
+		
+		//schedule setup detection task (once every 10s)
 		scheduler.scheduleAtFixedRate(new SetupDetectionTask(setupManager), 5, 10, TimeUnit.SECONDS);
+		
+		//schedule du command at quite less frequent intervals
 
 		}catch(RuntimeException e){
 			logger.error("Failed to execute server startup as expected");
