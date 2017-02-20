@@ -48,10 +48,16 @@ public class SnapshotAPI extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		
+		Date tic = new Date();
+		
 		SetupManager setupManager  = (SetupManager)getServletContext().getAttribute("setupManager");
 		
 		String time = request.getParameter("time");
 		String setup = request.getParameter("setup");
+		
+		String source = request.getRemoteHost();
+		
+		logger.debug("Received snapshot request (src="+source+")");
 		
 		logger.debug("Requested snapshot date: " + time);
 		Date timeDate = objectMapper.readValue(time, Date.class);
@@ -61,6 +67,12 @@ public class SnapshotAPI extends HttpServlet {
 			DAQSetup daqSetup = setupManager.getSetupByName(setup);
 			
 			if (daqSetup != null){
+				
+				if (time != null){
+					logger.debug("Request with point time query (src="+source+")");
+				}else{
+					logger.debug("Request without time (src="+source+"), latest available snapshot will be returned");
+				}
 				
 				//differentiate between time request and get latest snapshot when time param is empty
 				
@@ -77,13 +89,14 @@ public class SnapshotAPI extends HttpServlet {
 				logger.debug("Found snapshot with timestamp: " + new Date(result.getLastUpdate()));
 				logger.debug("Snapshot fragment: " + json.substring(0, 1000));
 			}else{
-				logger.warn("Request without DAQ setup specified received");
+				logger.warn("Request (src="+source+") without DAQ setup specified received");
 				throw new RuntimeException();
 			}
 		} catch (RuntimeException e) {
-			logger.warn("Requested snapshot with date: " + time + " and setup: "+ setup +" could not be found");
+			logger.warn("Request (src="+source+") snapshot with date: " + time + " and setup: "+ setup +" could not be found");
 			Map<String, String> result = new HashMap<>();
-			result.put("message", "Could not find snapshot");
+			String reason = "Could not find snapshot";
+			result.put("message", reason);
 			json = objectMapper.writeValueAsString(result);
 		}
 
@@ -96,6 +109,9 @@ public class SnapshotAPI extends HttpServlet {
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
 		response.getWriter().write(json);
+		
+		Date toc = new Date();
+		logger.debug("Serving snapshot API request took "+(toc.getTime()-tic.getTime())+" milliseconds");
 
 	}
 

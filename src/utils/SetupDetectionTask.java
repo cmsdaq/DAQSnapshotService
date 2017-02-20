@@ -1,5 +1,7 @@
 package utils;
 
+import java.util.Date;
+
 import org.apache.log4j.Logger;
 
 /**
@@ -10,21 +12,21 @@ import org.apache.log4j.Logger;
 
 public class SetupDetectionTask implements Runnable{
 
-	SetupManager setupDetector;
+	SetupManager setupManager;
 	
 	private static final Logger logger = Logger.getLogger(SetupDetectionTask.class);
 	
-	public SetupDetectionTask(SetupManager setupDetector) {
-		this.setupDetector = setupDetector;
+	public SetupDetectionTask(SetupManager setupManager) {
+		this.setupManager = setupManager;
 	}
 	
 	@Override
 	public void run() {
-		setupDetector.detectSetups();
-		
-		setupDetector.updateDiskUsage(); /*TODO:MOVE THIS TO A SEPARATE TASK FOR PRODUCTION*/
-		
-		
-		logger.debug("Setup detection task finished");
+		Date tic = new Date();
+		//acts entirely upon the setup manager object and the contained setup objects themselves
+		setupManager.detectSetups();
+		Date toc = new Date();
+
+		logger.info("Setup detection task took "+(toc.getTime()-tic.getTime())+" milliseconds");
 	}
 }

@@ -5,6 +5,7 @@
 <%@ page import="utils.DAQSetup"%>
 <%@ page import="javax.servlet.jsp.PageContext"%>
 <%@ page import="javax.servlet.jsp.JspException"%>
+<%@ page import="java.util.Properties"%>
     
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -19,7 +20,10 @@
  /*Data initialization*/
 
 	SetupManager setupManager  = (SetupManager)getServletContext().getAttribute("setupManager");
-	String baseLink = (String)getServletContext().getAttribute("linktodaqview");
+	Properties props = (Properties)getServletContext().getAttribute("properties");
+	
+	String baseLink = props.getProperty("linkToDaqviewApache");
+
 
 %>
 

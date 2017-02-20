@@ -1,6 +1,7 @@
 package servlets;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.Map;
 
 import javax.servlet.annotation.WebServlet;
@@ -27,7 +28,11 @@ public class SetupLauncherAPI extends HttpServlet {
 	@Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     
+		Date tic = new Date();
+		
 		SetupManager setupManager  = (SetupManager)getServletContext().getAttribute("setupManager");
+		
+		String source = request.getRemoteHost();
 		
 		String setup = "";
 		String action = "";
@@ -38,7 +43,7 @@ public class SetupLauncherAPI extends HttpServlet {
 			setup = e.getKey().replace("click_", "");
 			action = e.getValue()[0];
 			
-			logger.info("Received button command to "+action+" "+setup+" setup");
+			logger.info("Received button command (src="+source+") to "+action+" "+setup+" setup");
 			break; // only one parameter with one value expected
 		}
 		
@@ -50,6 +55,8 @@ public class SetupLauncherAPI extends HttpServlet {
 
         response.sendRedirect(getServletContext().getContextPath()+"/daqviews.jsp");
         
+        Date toc = new Date();
+		logger.debug("Serving launcher API request took "+(toc.getTime()-tic.getTime())+" milliseconds");
     }
 	
 }

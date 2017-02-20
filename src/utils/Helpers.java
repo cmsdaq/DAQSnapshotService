@@ -65,10 +65,10 @@ public class Helpers {
 			return properties;
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-			logger.warn("Could not find a prop-styled file");
+			logger.error("Could not find a prop-styled file");
 		} catch (IOException e) {
 			e.printStackTrace();
-			logger.warn("Could not I/O a prop-styled file");
+			logger.error("Could not I/O a prop-styled file");
 		}
 		return null;
 	}

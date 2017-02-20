@@ -38,9 +38,9 @@ public class SetupManager{
 	private static final Logger logger = Logger.getLogger(SetupManager.class);
 
 
-	public SetupManager (String configFilesDirPath, String pidLogFile){
-		this.configFilesDirPath = configFilesDirPath;
-		this.pidLogFile = pidLogFile;
+	public SetupManager (Properties props){
+		this.configFilesDirPath = props.getProperty("daqAggregatorConfigFilesDirPath");
+		this.pidLogFile = props.getProperty("daqAggregatorPidLogFile");
 		setups = new HashMap<String, DAQSetup>();
 		maskedSetups = new HashSet<String>();
 		revisitedSetups = new HashSet<String>();
@@ -91,14 +91,17 @@ public class SetupManager{
 						continue;
 					}
 
+					//DAQAggregator properties file for this setup
+					Properties DaqAggregatorInfo = Helpers.loadProps(f.getAbsolutePath());
+
 					String setupName = f.getName().substring(0, f.getName().indexOf(".")); //takes setup name from config file name
 					setupName = setupName.toLowerCase().trim(); //normalization to be used with map/set
-					String setupSnapshotPath = Helpers.loadProps(f.getAbsolutePath()).getProperty("persistence.snapshot.dir");
-					String setupRemark = Helpers.loadProps(f.getAbsolutePath()).getProperty("remark");
+					String setupSnapshotPath = DaqAggregatorInfo.getProperty("persistence.snapshot.dir");
+					String setupRemark = DaqAggregatorInfo.getProperty("remark");
 
 					//still valid setup revisited
 					this.revisitedSetups.add(setupName);
-					
+
 					if (this.setups.containsKey(setupName)){
 						//do not add a new DAQSetup object, if already existing, only update, if applicable
 
@@ -131,43 +134,22 @@ public class SetupManager{
 		}
 	}
 
-	public void updateDiskUsage(){
-		for (Map.Entry<String, DAQSetup> setupEntry: this.setups.entrySet()){
-			setupEntry.getValue().setDiskUsage(queryDiskUsage(setupEntry.getValue().getSnapshotPath()));
+	/**Sets disk usage field at all setup objects (it should not include the actual computation)*/
+	public synchronized void updateDiskUsage(Map <String, String> results){ //thread safety!
+		//key: setup name, value: DU descriptive message
+		
+		for (Map.Entry<String, String> e: results.entrySet()){
+			this.setups.get(e.getKey()).setDiskUsage(e.getValue());
 		}
 	}
-
-	private String queryDiskUsage(String setupSnapshotPath) {
-		String ret;
-
-		try {
-			Process p = Runtime.getRuntime().exec("du -sh "+setupSnapshotPath);
-
-			BufferedReader ips =  new BufferedReader(new InputStreamReader(p.getInputStream()));
-
-			String line;
-			String pInfo ="";
-			while ((line = ips.readLine()) != null) {
-				pInfo+=line; 
-			}
-
-			ips.close();
-
-			
-			ret = pInfo.split("/")[0].trim();
-			
-			//a valid du response contains at least one char for the quantity and one char for the units
-			if (ret.length()<2){
-				ret = null;
-			}
-			
-
-		}catch(IOException e){
-			ret = "?";
-			logger.warn("Could not find out disk usage of directory "+setupSnapshotPath);
+	
+	/**Sets path to latest snapshot at all setup objects (it should not include the actual computation)*/
+	public synchronized void updateLatestSnapshot(Map <String, String> results){ //thread safety!
+		//key: setup name, value: path to file smile
+		
+		for (Map.Entry<String, String> e: results.entrySet()){
+			this.setups.get(e.getKey()).setLatestSnapshotPath(e.getValue());
 		}
-
-		return ret;
 	}
 
 	/**Scans all indexed-by-setupName Aggregator processes and discovers their process state*/
@@ -200,7 +182,6 @@ public class SetupManager{
 					while ((line = ips.readLine()) != null) {
 						pInfo+=line; 
 					}
-
 					ips.close();
 
 					if (pInfo.contains(Long.toString(pid))&&pInfo.contains("java")){
@@ -217,8 +198,8 @@ public class SetupManager{
 		}
 	}
 
-	/**Method to ensure atomicity of the three-step setup discovery (background must call this)*/
-	public void detectSetups(){
+	/**Method to ensure atomicity of the three-step setup discovery (background must call this method only)*/
+	public synchronized void detectSetups(){ //thread safety!
 		maskedSetups = new HashSet<String>();
 		revisitedSetups = new HashSet<String>();
 		scanDeclaredConfigurations();
@@ -261,45 +242,50 @@ public class SetupManager{
 		return ret;
 	}
 
-	public boolean startSetupByName(String name){
+	public synchronized boolean startSetupByName(String name){ //thread safety!
 		logger.info("Starting setup: "+name);
 		boolean success = false;
-		//get daq, file and start it
+
+		String DAQAggregatorConfigFile = this.configFilesDirPath+"/"+name+".DAQAggregator.properties";
+
+		String DAQAggregatorBinary = Helpers.loadProps(DAQAggregatorConfigFile).getProperty("daqaggregator");
 		
-		String DAQAggregatorBinary = "";
 
 		//do checks before
-		
-		//do something with Aggregator's log and err outputs
 
 		//replace script logic with servlet code!
 		
-		
-		
-		try{
-			Process p = Runtime.getRuntime().exec("sh /usr/mvougiou/monitoring_pro/DaqAggScript.sh Feb17 "+name);
+		//do something with Aggregator's log and err outputs (merge to log file for this instance?)
 
-			logger.info("Started setup: "+name);
+
+
+		try{
+			//start an aggregator process with a given binary and a configuration file
+			Process p = Runtime.getRuntime().exec("sh /usr/mvougiou/monitoring_pro/start.sh "+DAQAggregatorBinary+" "+DAQAggregatorConfigFile + " " + name);
+
+			logger.info("Started setup: "+name+" with executable: "+DAQAggregatorBinary+" (should be picked up by front-end in a while)");
+			success = true;
 		}catch(RuntimeException|IOException e){
 			logger.error("Failed to start a setup");
 			e.printStackTrace();
 		}
-		
+
 		return success;
 	}
 
-	public boolean stopSetupByName(String name){
+	public synchronized boolean stopSetupByName(String name){ //thread safety!
 		logger.info("Stopping setup: "+name);
 		boolean success = false;
 
 		//do checks before!
 		
+		//replace script logic with servlet code!
 
 		try{
 			Process p = Runtime.getRuntime().exec("kill "+this.setups.get(name).getLastPid());
 
-			logger.info("Stopped setup: "+name);
-
+			logger.info("Stopped setup: "+name+" (should be picked up by front-end in a while)");
+			success = true;
 		}catch(RuntimeException|IOException e){
 			logger.error("Failed to stop a setup");
 			e.printStackTrace();
