@@ -78,9 +78,9 @@ for (DAQSetup ds: setupManager.getAvailableSetups()){
 			if (ds.isSetupRunning()){
 				statusMsg = "running";
 				buttonTag = "stop";
-				link_all = "<a href=\""+baseLink+"index.html?setup="+ds.getName()+"\">DAQView - all</a>";
-				link_fb = "<a href=\""+baseLink+"index_fb.html?setup="+ds.getName()+"\">DAQView - fb</a>";
-				link_fff = "<a href=\""+baseLink+"index_fff.html?setup="+ds.getName()+"\">DAQView - fff</a>";
+				link_all = "<a target=\"_blank\" href=\""+baseLink+"index.html?setup="+ds.getName()+"\">DAQView - all</a>";
+				link_fb = "<a target=\"_blank\"href=\""+baseLink+"index_fb.html?setup="+ds.getName()+"\">DAQView - fb</a>";
+				link_fff = "<a target=\"_blank\"href=\""+baseLink+"index_fff.html?setup="+ds.getName()+"\">DAQView - fff</a>";
 				links = link_all+"<br/>"+link_fb+"<br/>"+link_fff;
 				if (ds.getDiskUsage() == null){
 					//in this case do not hide DAQView links, as it may be just the du command who took longer and data might exist (might happen at startup, when the snapshot dir is already huge)
@@ -90,9 +90,9 @@ for (DAQSetup ds: setupManager.getAvailableSetups()){
 				}
 			}else{
 				statusMsg = "stopped";
-				link_all = "<a href=\""+baseLink+"index.html?setup="+ds.getName()+"\">DAQView - all</a>";
-				link_fb = "<a href=\""+baseLink+"index_fb.html?setup="+ds.getName()+"\">DAQView - fb</a>";
-				link_fff = "<a href=\""+baseLink+"index_fff.html?setup="+ds.getName()+"\">DAQView - fff</a>";
+				link_all = "<a target=\"_blank\"href=\""+baseLink+"index.html?setup="+ds.getName()+"\">DAQView - all</a>";
+				link_fb = "<a target=\"_blank\"href=\""+baseLink+"index_fb.html?setup="+ds.getName()+"\">DAQView - fb</a>";
+				link_fff = "<a target=\"_blank\"href=\""+baseLink+"index_fff.html?setup="+ds.getName()+"\">DAQView - fff</a>";
 				links = link_all+"<br/>"+link_fb+"<br/>"+link_fff;
 				
 				if (ds.getDiskUsage() == null){

@@ -137,18 +137,20 @@ public class SetupManager{
 	/**Sets disk usage field at all setup objects (it should not include the actual computation)*/
 	public synchronized void updateDiskUsage(Map <String, String> results){ //thread safety!
 		//key: setup name, value: DU descriptive message
-		
+
 		for (Map.Entry<String, String> e: results.entrySet()){
 			this.setups.get(e.getKey()).setDiskUsage(e.getValue());
 		}
 	}
-	
+
 	/**Sets path to latest snapshot at all setup objects (it should not include the actual computation)*/
 	public synchronized void updateLatestSnapshot(Map <String, String> results){ //thread safety!
 		//key: setup name, value: path to file smile
-		
+
 		for (Map.Entry<String, String> e: results.entrySet()){
-			this.setups.get(e.getKey()).setLatestSnapshotPath(e.getValue());
+			if (e.getValue() != null){
+				this.setups.get(e.getKey()).setLatestSnapshot(e.getValue());
+			}
 		}
 	}
 
@@ -249,12 +251,12 @@ public class SetupManager{
 		String DAQAggregatorConfigFile = this.configFilesDirPath+"/"+name+".DAQAggregator.properties";
 
 		String DAQAggregatorBinary = Helpers.loadProps(DAQAggregatorConfigFile).getProperty("daqaggregator");
-		
+
 
 		//do checks before
 
 		//replace script logic with servlet code!
-		
+
 		//do something with Aggregator's log and err outputs (merge to log file for this instance?)
 
 
@@ -278,7 +280,7 @@ public class SetupManager{
 		boolean success = false;
 
 		//do checks before!
-		
+
 		//replace script logic with servlet code!
 
 		try{

@@ -33,7 +33,7 @@ import utils.SetupManager;
 
 @WebServlet("/getsnapshot")
 public class SnapshotAPI extends HttpServlet {
-	
+
 
 	/**
 	 * 
@@ -47,49 +47,60 @@ public class SnapshotAPI extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		
+
 		Date tic = new Date();
-		
+
 		SetupManager setupManager  = (SetupManager)getServletContext().getAttribute("setupManager");
-		
+
 		String time = request.getParameter("time");
 		String setup = request.getParameter("setup");
-		
+
 		String source = request.getRemoteHost();
-		
+
 		logger.debug("Received snapshot request (src="+source+")");
-		
-		logger.debug("Requested snapshot date: " + time);
-		Date timeDate = objectMapper.readValue(time, Date.class);
-		logger.debug("Parsed requested snapshot date: " + timeDate);
+
 		String json = "";
 		try {
 			DAQSetup daqSetup = setupManager.getSetupByName(setup);
-			
+
 			if (daqSetup != null){
-				
-				if (time != null){
-					logger.debug("Request with point time query (src="+source+")");
-				}else{
-					logger.debug("Request without time (src="+source+"), latest available snapshot will be returned");
-				}
-				
-				//differentiate between time request and get latest snapshot when time param is empty
-				
 				APIPersistorManager persistorManager = new APIPersistorManager(daqSetup.getSnapshotPath());
 
-				DAQ result = persistorManager.findSnapshot(timeDate);
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				if (time != null){
+					logger.info("Request with point time query (src="+source+")");
 
-				StructureSerializer ss = new StructureSerializer();
-				ss.serialize(result, baos, PersistenceFormat.JSONREFPREFIXEDUGLY);
+					logger.debug("Requested snapshot date: " + time);
+					Date timeDate = objectMapper.readValue(time, Date.class);
+					logger.debug("Parsed requested snapshot date: " + timeDate);
 
-				json = baos.toString(java.nio.charset.StandardCharsets.UTF_8.toString());
+					DAQ result = persistorManager.findSnapshot(timeDate);
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-				logger.debug("Found snapshot with timestamp: " + new Date(result.getLastUpdate()));
-				logger.debug("Snapshot fragment: " + json.substring(0, 1000));
+					StructureSerializer ss = new StructureSerializer();
+					ss.serialize(result, baos, PersistenceFormat.JSONREFPREFIXEDUGLY);
+
+					json = baos.toString(java.nio.charset.StandardCharsets.UTF_8.toString());
+
+					logger.debug("Found snapshot with timestamp: " + new Date(result.getLastUpdate()));
+					//logger.debug("Snapshot fragment: " + json.substring(0, 1000));
+
+				}else{
+					logger.info("Request without time (src="+source+"), - get latest available snapshot");
+					if (daqSetup.getLatestSnapshot() != null){
+
+						json = daqSetup.getLatestSnapshot(); //json ready for consumption
+
+						logger.debug("Found latest snapshot");
+						//logger.debug("Snapshot fragment: " + json.substring(0, 1000));
+
+					}else{
+						logger.warn("Requested (src="+source+") latest snapshot, but the pointer to that is null");
+						throw new RuntimeException();
+					}
+				}
+
 			}else{
-				logger.warn("Request (src="+source+") without DAQ setup specified received");
+				logger.warn("Request (src="+source+") without DAQ setup specified received. Client must specify a setup.");
 				throw new RuntimeException();
 			}
 		} catch (RuntimeException e) {
@@ -109,7 +120,7 @@ public class SnapshotAPI extends HttpServlet {
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
 		response.getWriter().write(json);
-		
+
 		Date toc = new Date();
 		logger.debug("Serving snapshot API request took "+(toc.getTime()-tic.getTime())+" milliseconds");
 

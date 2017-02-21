@@ -23,7 +23,7 @@ import rcms.utilities.daqaggregator.persistence.StructureSerializer;
  * 
  * @author Maciej Gladki (maciej.szymon.gladki@cern.ch)
  */
- 
+
 public class APIPersistorManager extends PersistorManager {
 
 	private static final Logger logger = Logger.getLogger(APIPersistorManager.class);
@@ -54,7 +54,7 @@ public class APIPersistorManager extends PersistorManager {
 		candidateDir = this.getTimeDir(snapshotPersistenceDir, date);
 
 		logger.debug("Candidates will be searched in " + candidateDir);
-		
+
 		try {
 			candidates.addAll(persistenceExplorer.getFileSystemConnector().getFiles(candidateDir));
 		} catch (FileNotFoundException e) {
@@ -65,12 +65,12 @@ public class APIPersistorManager extends PersistorManager {
 		return findSnapshot(date, candidates);
 
 	}
-	
+
 	public DAQ findSnapshot(Date date, String setupPath) throws IOException {
-		
+
 		List<File> candidates = new ArrayList<>();
 		String candidateDir = null;
-		
+
 		logger.debug("Searching snapshot for date: " + date + ", base dir: " + setupPath);
 
 		candidateDir = this.getTimeDir(setupPath, date);
@@ -80,7 +80,7 @@ public class APIPersistorManager extends PersistorManager {
 		try {
 			candidates.addAll(persistenceExplorer.getFileSystemConnector().getFiles(candidateDir));
 		} catch (FileNotFoundException e) {
-			
+
 			candidates = new ArrayList<>();
 			logger.warn("Cannot access persistence dir, ignoring...");
 		}
@@ -139,7 +139,15 @@ public class APIPersistorManager extends PersistorManager {
 		logger.warn("No snapshot found for date " + date);
 		return null;
 	}
-	
+
+
+	public DAQ loadSnapshot(String filepath){
+		DAQ ret = null;
+		StructureSerializer structurePersistor = new StructureSerializer();
+		ret = structurePersistor.deserialize(filepath, PersistenceFormat.SMILE);
+		return ret;
+	}
+
 	public String getDefaultSnapshotPersistenceDir(){
 		return snapshotPersistenceDir;
 	}

@@ -19,7 +19,7 @@ public class DiskUsageTask implements Runnable{
 
 	SetupManager setupManager;
 	
-	private static final Logger logger = Logger.getLogger(SetupDetectionTask.class);
+	private static final Logger logger = Logger.getLogger(DiskUsageTask.class);
 	
 	public DiskUsageTask(SetupManager setupManager) {
 		this.setupManager = setupManager;

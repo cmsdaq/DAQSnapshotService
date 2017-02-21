@@ -39,8 +39,8 @@ public class DAQSetup {
 
 	//*other fields*
 
-	//path to latest snapshot
-	private String latestSnapshotPath;
+	//latest snapshot parsed and deserialized as json consumable by clients
+	private String latestSnapshot;
 	
 
 	public DAQSetup(String name){
@@ -131,13 +131,13 @@ public class DAQSetup {
 	}
 
 
-	public String getLatestSnapshotPath() {
-		return latestSnapshotPath;
+	public String getLatestSnapshot() {
+		return latestSnapshot;
 	}
 
 
-	public void setLatestSnapshotPath(String latestSnapshotPath) {
-		this.latestSnapshotPath = latestSnapshotPath;
+	public void setLatestSnapshot(String latestSnapshot) {
+		this.latestSnapshot = latestSnapshot;
 	}
 
 
