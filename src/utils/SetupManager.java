@@ -35,12 +35,15 @@ public class SetupManager{
 
 	private Set<String> revisitedSetups; //contains only setups encountered in current iteration (flushed at each iteration, unlike the map of setups)
 
+	private String startScript; //script to start DAQAggregator processes and catch their pids
+	
 	private static final Logger logger = Logger.getLogger(SetupManager.class);
 
 
 	public SetupManager (Properties props){
 		this.configFilesDirPath = props.getProperty("daqAggregatorConfigFilesDirPath");
 		this.pidLogFile = props.getProperty("daqAggregatorPidLogFile");
+		this.startScript = props.getProperty("startScript");
 		setups = new HashMap<String, DAQSetup>();
 		maskedSetups = new HashSet<String>();
 		revisitedSetups = new HashSet<String>();
@@ -251,20 +254,16 @@ public class SetupManager{
 		String DAQAggregatorConfigFile = this.configFilesDirPath+"/"+name+".DAQAggregator.properties";
 
 		String DAQAggregatorBinary = Helpers.loadProps(DAQAggregatorConfigFile).getProperty("daqaggregator");
-
-
-		//do checks before
-
-		//replace script logic with servlet code!
-
-		//do something with Aggregator's log and err outputs (merge to log file for this instance?)
-
-
+		
+		String DAQAggregatorLogfile = Helpers.loadProps(DAQAggregatorConfigFile).getProperty("logfile");
 
 		try{
 			//start an aggregator process with a given binary and a configuration file
-			Process p = Runtime.getRuntime().exec("sh /usr/mvougiou/monitoring_pro/start.sh "+DAQAggregatorBinary+" "+DAQAggregatorConfigFile + " " + name);
-
+			
+			//wrap in process builder
+			ProcessBuilder builder = new ProcessBuilder("sh", this.startScript, DAQAggregatorBinary, DAQAggregatorConfigFile, name, DAQAggregatorLogfile);
+			builder.start();
+			
 			logger.info("Started setup: "+name+" with executable: "+DAQAggregatorBinary+" (should be picked up by front-end in a while)");
 			success = true;
 		}catch(RuntimeException|IOException e){
@@ -279,13 +278,12 @@ public class SetupManager{
 		logger.info("Stopping setup: "+name);
 		boolean success = false;
 
-		//do checks before!
-
-		//replace script logic with servlet code!
-
 		try{
-			Process p = Runtime.getRuntime().exec("kill "+this.setups.get(name).getLastPid());
-
+			
+			//wrap in process builder
+			ProcessBuilder builder = new ProcessBuilder("kill", String.valueOf(this.setups.get(name).getLastPid()));
+			builder.start();
+			
 			logger.info("Stopped setup: "+name+" (should be picked up by front-end in a while)");
 			success = true;
 		}catch(RuntimeException|IOException e){
