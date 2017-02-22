@@ -32,7 +32,7 @@ public class ContextListener implements javax.servlet.ServletContextListener{
 		rootLogger.setLevel(Level.INFO);
 		logger.info("Logging level: "+rootLogger.getLevel().toString());
 
-		String webAppConfigurationPath = "/usr/mvougiou/monitoring_pro/server_files/daqview-react-server.properties";
+		String webAppConfigurationPath = "/usr/mvougiou/monitoring_pro/server_files/DAQSnapshotService-server.properties";
 
 		try{
 
@@ -58,8 +58,8 @@ public class ContextListener implements javax.servlet.ServletContextListener{
 			logger.info("Scheduled setup detection task: first detection will be launched after "+delaySd+"s and every "+periodSd+" afterwards");
 
 			//schedule du command at quite less frequent intervals  
-			int delayDu = 5;
-			int periodDu = 10;
+			int delayDu = 30;
+			int periodDu = 60;
 			scheduler.scheduleAtFixedRate(new DiskUsageTask(setupManager), delayDu, periodDu, TimeUnit.SECONDS);
 			logger.info("Scheduled disk usage task: first detection will be launched after "+delayDu+"s and every "+periodDu+" afterwards");
 
