@@ -84,7 +84,7 @@ for (DAQSetup ds: setupManager.getAvailableSetups()){
 				links = link_all+"<br/>"+link_fb+"<br/>"+link_fff;
 				if (ds.getDiskUsage() == null){
 					//in this case do not hide DAQView links, as it may be just the du command who took longer and data might exist (might happen at startup, when the snapshot dir is already huge)
-					notes = "Running but no snapshot data seem to have been produced yet: be patient if you just started it, otherwise investigate DAQAggregator logs";
+					notes = "Running but no snapshot data seem to have been produced yet (if you just started the service or setup, be patient for du...)";
 				}else{
 					notes = "Realtime views";
 				}
@@ -97,7 +97,7 @@ for (DAQSetup ds: setupManager.getAvailableSetups()){
 				
 				if (ds.getDiskUsage() == null){
 					//in this case do not hide DAQView links, as it may be just the du command who took longer and data might exist (might happen at startup, when the snapshot dir is already huge)
-					notes = "Has run in the past, but no snapshot data seem to have been produced";
+					notes = "Has run in the past, but no snapshot data seem to have been produced (if you just started the service, be patient for du...)";
 				}else{
 					notes = "Not running anymore, but DAQView can still be used to go back in time";
 				}
@@ -123,7 +123,7 @@ for (DAQSetup ds: setupManager.getAvailableSetups()){
 <td><form method="post" action="${pageContext.request.contextPath}/managesetup"><input type="submit" name="click_<%=ds.getName()%>" value="<%=buttonTag%>" /></form></td>
 <td><%=ds.getDiskUsage() != null ? ds.getDiskUsage() : "N/A"%></td>
 <td><%=links%></td>
-<td width = "15%"><%=notes%></td>
+<td width = "15%"><div style="font-size: 95%; font-style: italic"><%=notes%></div></td>
 </tr>
 
 

@@ -58,14 +58,14 @@ public class ContextListener implements javax.servlet.ServletContextListener{
 			logger.info("Scheduled setup detection task: first detection will be launched after "+delaySd+"s and every "+periodSd+" afterwards");
 
 			//schedule du command at quite less frequent intervals  
-			int delayDu = 30;
-			int periodDu = 60;
+			int delayDu = 20; //seconds
+			int periodDu = 60; //seconds
 			scheduler.scheduleAtFixedRate(new DiskUsageTask(setupManager), delayDu, periodDu, TimeUnit.SECONDS);
 			logger.info("Scheduled disk usage task: first detection will be launched after "+delayDu+"s and every "+periodDu+" afterwards");
 
 			//schedule latest snapshot discovery, to store latest snapshot for a setup without needing prompt from a request 
-			int delaySn = 10000;
-			int periodSn = 200;
+			int delaySn = 10000; //milliseconds
+			int periodSn = 200; //milliseconds
 			scheduler.scheduleAtFixedRate(new GetLatestTask(setupManager), delaySn, periodSn, TimeUnit.MILLISECONDS);
 			logger.info("Scheduled latest snapshots discovery task: first detection will be launched after "+delaySn+"ms and every "+periodSn+" afterwards");
 
