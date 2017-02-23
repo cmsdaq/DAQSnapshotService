@@ -67,7 +67,7 @@ public class SnapshotAPI extends HttpServlet {
 				APIPersistorManager persistorManager = new APIPersistorManager(daqSetup.getSnapshotPath());
 
 				if (time != null){
-					logger.info("Request with point time query (src="+source+")");
+					logger.debug("Request with point time query (src="+source+")");
 
 					logger.debug("Requested snapshot date: " + time);
 					Date timeDate = objectMapper.readValue(time, Date.class);
