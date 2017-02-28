@@ -85,7 +85,7 @@ public class SnapshotAPI extends HttpServlet {
 					//logger.debug("Snapshot fragment: " + json.substring(0, 1000));
 
 				}else{
-					logger.info("Request without time (src="+source+"), - get latest available snapshot");
+					logger.debug("Request without time (src="+source+"), - get latest available snapshot");
 					if (daqSetup.getLatestSnapshot() != null){
 
 						json = daqSetup.getLatestSnapshot(); //json ready for consumption
@@ -94,7 +94,7 @@ public class SnapshotAPI extends HttpServlet {
 						//logger.debug("Snapshot fragment: " + json.substring(0, 1000));
 
 					}else{
-						logger.warn("Requested (src="+source+") latest snapshot, but the pointer to that is null");
+						logger.warn("Requested (src="+source+") to get latest snapshot, but the pointer to latest snapshot for "+daqSetup.getName()+" is null.");
 						throw new RuntimeException();
 					}
 				}

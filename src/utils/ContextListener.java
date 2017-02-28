@@ -32,7 +32,8 @@ public class ContextListener implements javax.servlet.ServletContextListener{
 		rootLogger.setLevel(Level.INFO);
 		logger.info("Logging level: "+rootLogger.getLevel().toString());
 
-		String webAppConfigurationPath = "/usr/mvougiou/monitoring_pro/server_files/DAQSnapshotService-server.properties";
+		String webAppConfigurationPath = "/cmsnfshome0/nfshome0/daqpro/daqexpert/daqview-react-server/daqview-react-server-conf/DAQSnapshotService-server.properties";
+		//String webAppConfigurationPath = "/usr/mvougiou/monitoring_pro/server_files/DAQSnapshotService-server.properties";
 
 		try{
 
@@ -48,7 +49,7 @@ public class ContextListener implements javax.servlet.ServletContextListener{
 
 
 			//scheduler for periodical tasks, such 
-			scheduler = Executors.newSingleThreadScheduledExecutor();
+			scheduler = Executors.newScheduledThreadPool(4);
 			logger.info("Initialized scheduler");
 
 			//schedule setup detection task (once every 10s)
@@ -58,8 +59,8 @@ public class ContextListener implements javax.servlet.ServletContextListener{
 			logger.info("Scheduled setup detection task: first detection will be launched after "+delaySd+"s and every "+periodSd+" afterwards");
 
 			//schedule du command at quite less frequent intervals  
-			int delayDu = 20; //seconds
-			int periodDu = 60; //seconds
+			int delayDu = 30; //seconds
+			int periodDu = 600; //seconds
 			scheduler.scheduleAtFixedRate(new DiskUsageTask(setupManager), delayDu, periodDu, TimeUnit.SECONDS);
 			logger.info("Scheduled disk usage task: first detection will be launched after "+delayDu+"s and every "+periodDu+" afterwards");
 
