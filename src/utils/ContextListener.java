@@ -60,7 +60,7 @@ public class ContextListener implements javax.servlet.ServletContextListener{
 
 			//schedule du command at quite less frequent intervals  
 			int delayDu = 30; //seconds
-			int periodDu = 600; //seconds
+			int periodDu = 2700; //seconds
 			scheduler.scheduleAtFixedRate(new DiskUsageTask(setupManager), delayDu, periodDu, TimeUnit.SECONDS);
 			logger.info("Scheduled disk usage task: first detection will be launched after "+delayDu+"s and every "+periodDu+" afterwards");
 
