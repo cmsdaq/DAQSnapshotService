@@ -67,7 +67,7 @@ for (DAQSetup ds: setupManager.getAvailableSetups()){
 			statusMsg = "never ran";
 			link_all = "N/A";
 			links = link_all;
-			pidAsString = "N/A";
+			pidAsString = "";
 			
 			if (ds.getDiskUsage() == null){
 				notes = "No snapshot data found: expected, as this setup has never run";
@@ -90,6 +90,7 @@ for (DAQSetup ds: setupManager.getAvailableSetups()){
 				}
 			}else{
 				statusMsg = "stopped";
+				pidAsString = "";
 				link_all = "<a target=\"_blank\"href=\""+baseLink+"index.html?setup="+ds.getName()+"\">DAQView - all</a>";
 				link_fb = "<a target=\"_blank\"href=\""+baseLink+"index_fb.html?setup="+ds.getName()+"\">DAQView - fb</a>";
 				link_fff = "<a target=\"_blank\"href=\""+baseLink+"index_fff.html?setup="+ds.getName()+"\">DAQView - fff</a>";

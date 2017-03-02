@@ -95,18 +95,21 @@ public class SnapshotAPI extends HttpServlet {
 
 					}else{
 						logger.warn("Requested (src="+source+") to get latest snapshot, but the pointer to latest snapshot for "+daqSetup.getName()+" is null.");
-						throw new RuntimeException();
+						throw new RuntimeException("Latest snapshot unknown");
 					}
 				}
 
 			}else{
 				logger.warn("Request (src="+source+") without DAQ setup specified received. Client must specify a setup.");
-				throw new RuntimeException();
+				throw new RuntimeException("Please specify DAQ setup");
 			}
 		} catch (RuntimeException e) {
 			logger.warn("Request (src="+source+") snapshot with date: " + time + " and setup: "+ setup +" could not be found");
 			Map<String, String> result = new HashMap<>();
 			String reason = "Could not find snapshot";
+			if (e.getMessage()!=null && !e.getMessage().equals("")){
+				reason = e.getMessage();
+			}
 			result.put("message", reason);
 			json = objectMapper.writeValueAsString(result);
 		}
