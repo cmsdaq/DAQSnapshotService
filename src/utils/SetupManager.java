@@ -281,7 +281,7 @@ public class SetupManager{
 		try{
 			
 			//wrap in process builder
-			ProcessBuilder builder = new ProcessBuilder("kill", String.valueOf(this.setups.get(name).getLastPid()));
+			ProcessBuilder builder = new ProcessBuilder("kill", "-9", String.valueOf(this.setups.get(name).getLastPid()));
 			builder.start();
 			
 			logger.info("Stopped setup: "+name+" (should be picked up by front-end in a while)");
