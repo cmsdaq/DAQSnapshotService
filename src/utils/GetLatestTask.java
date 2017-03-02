@@ -115,6 +115,8 @@ public class GetLatestTask implements Runnable{
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
 			StructureSerializer ss = new StructureSerializer();
+			
+			//the usual client of getLatest requests needs the most compact possible format
 			ss.serialize(result, baos, PersistenceFormat.JSONREFPREFIXEDUGLY);
 
 			json = baos.toString(java.nio.charset.StandardCharsets.UTF_8.toString());

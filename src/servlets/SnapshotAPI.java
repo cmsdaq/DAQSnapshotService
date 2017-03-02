@@ -77,7 +77,7 @@ public class SnapshotAPI extends HttpServlet {
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
 					StructureSerializer ss = new StructureSerializer();
-					ss.serialize(result, baos, PersistenceFormat.JSONREFPREFIXEDUGLY);
+					ss.serialize(result, baos, PersistenceFormat.JSONREFPREFIXED); //point time queries are infrequent, so we can afford providing formatted jsons
 
 					json = baos.toString(java.nio.charset.StandardCharsets.UTF_8.toString());
 
