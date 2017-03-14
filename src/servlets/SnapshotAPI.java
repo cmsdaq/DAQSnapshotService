@@ -118,11 +118,12 @@ public class SnapshotAPI extends HttpServlet {
 		response.addHeader("Access-Control-Allow-Methods", "GET");
 		response.addHeader("Access-Control-Allow-Headers",
 				"X-PINGOTHER, Origin, X-Requested-With, Content-Type, Accept");
+		response.addHeader("Access-Control-Expose-Headers",
+				"Date");
 		response.addHeader("Access-Control-Max-Age", "1728000");
 
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
-		response.setDateHeader("Date", new Date().getTime());
 		response.getWriter().write(json);
 
 		Date toc = new Date();
