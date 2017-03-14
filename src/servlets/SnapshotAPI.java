@@ -122,6 +122,7 @@ public class SnapshotAPI extends HttpServlet {
 
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
+		response.setDateHeader("Date", new Date().getTime());
 		response.getWriter().write(json);
 
 		Date toc = new Date();
