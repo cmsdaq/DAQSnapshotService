@@ -3,9 +3,6 @@
         <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
         <wb-resource deploy-path="/" source-path="/WebContent" tag="defaultRootSource"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
-        <dependent-module archiveName="DAQAggregator-1.5.7.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/DAQAggregator/DAQAggregator">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
         <property name="context-root" value="DAQSnapshotService"/>
         <property name="java-output-path" value="/DAQSnapshotService/build/classes"/>
     </wb-module>

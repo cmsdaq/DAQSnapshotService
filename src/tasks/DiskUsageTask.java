@@ -1,4 +1,4 @@
-package utils;
+package tasks;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,6 +8,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.log4j.Logger;
+
+import utils.DAQSetup;
+import utils.SetupManager;
 
 /**
  * 

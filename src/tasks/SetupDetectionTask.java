@@ -1,8 +1,10 @@
-package utils;
+package tasks;
 
 import java.util.Date;
 
 import org.apache.log4j.Logger;
+
+import utils.SetupManager;
 
 /**
  * 

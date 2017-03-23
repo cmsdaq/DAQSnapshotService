@@ -26,11 +26,13 @@
 			<version>1.2.17</version>
 		</dependency>
 
+		<!--  
 		<dependency>
 			<groupId>ch.cern</groupId>
 			<artifactId>DAQAggregator</artifactId>
-			<version>1.5.7</version>
+			<version>1.5.8pre</version>
 		</dependency>
+		-->
 
 		<!-- JSP -->
 		<dependency>

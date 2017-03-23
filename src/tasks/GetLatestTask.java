@@ -1,4 +1,4 @@
-package utils;
+package tasks;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -14,6 +14,8 @@ import org.apache.log4j.Logger;
 import rcms.utilities.daqaggregator.data.DAQ;
 import rcms.utilities.daqaggregator.persistence.PersistenceFormat;
 import rcms.utilities.daqaggregator.persistence.StructureSerializer;
+import utils.DAQSetup;
+import utils.SetupManager;
 
 /**
  * 
