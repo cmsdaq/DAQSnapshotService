@@ -29,6 +29,6 @@ public class SetupDetectionTask implements Runnable{
 		setupManager.detectSetups();
 		Date toc = new Date();
 
-		logger.info("Setup detection task took "+(toc.getTime()-tic.getTime())+" milliseconds");
+		logger.debug("Setup detection task took "+(toc.getTime()-tic.getTime())+" milliseconds");
 	}
 }
