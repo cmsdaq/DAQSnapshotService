@@ -247,16 +247,34 @@ public class SetupManager{
 		return ret;
 	}
 
-	public synchronized boolean startSetupByName(String name){ //thread safety!
+	public synchronized boolean startSetupByName(String name, Date callerTimestamp){ //thread safety!
 		logger.info("Starting setup: "+name);
+		
 		boolean success = false;
 		
-		if (this.setups.get(name).isLauncherLocked()){
-			logger.info("Attempt to start a setup seconds after previous start command: aborting");
+		boolean acceptLaunch = true;
+		
+		String previousStartCall;
+		
+		if (this.setups.get(name).getLastStartCommandTimestamp() != null){
+			previousStartCall = this.setups.get(name).getLastStartCommandTimestamp().toString();
+			
+			//aborting if less than 12 seconds (daq setup detection time + GUI refresh rate + epsilon)
+			if ((callerTimestamp.getTime() - this.setups.get(name).getLastStartCommandTimestamp().getTime()) < 12000){
+				acceptLaunch = false;
+			}
+			
+		}else{
+			previousStartCall = "never";
+		}
+		
+		logger.info("-previous start method call at: "+previousStartCall);
+		
+		if (!acceptLaunch){
+			logger.info("Attempt to start a setup after a very recent previous start command: aborting...please let the system take its time before you click the start button twice!");
 			return success;
 		}else{
-			//acquiring setup launcher lock
-			this.setups.get(name).setLauncherLocked(true);
+			this.setups.get(name).setLastStartCommandTimestamp(callerTimestamp);
 		}
 
 		String DAQAggregatorConfigFile = this.configFilesDirPath+"/"+name+".DAQAggregator.properties";
@@ -278,9 +296,6 @@ public class SetupManager{
 			logger.error("Failed to start a setup");
 			e.printStackTrace();
 		}
-
-		//releasing setup launcher lock
-		this.setups.get(name).setLauncherLocked(false);
 		
 		return success;
 	}

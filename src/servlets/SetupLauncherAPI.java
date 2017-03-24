@@ -48,7 +48,7 @@ public class SetupLauncherAPI extends HttpServlet {
 		}
 		
         if (action.equalsIgnoreCase("start")) {
-           setupManager.startSetupByName(setup);
+           setupManager.startSetupByName(setup, new Date());
         } else {
            setupManager.stopSetupByName(setup);
         } 

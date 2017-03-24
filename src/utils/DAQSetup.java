@@ -1,5 +1,7 @@
 package utils;
 
+import java.util.Date;
+
 /**
  * 
  * @author Michail Vougioukas (michail.vougioukas@cern.ch)
@@ -42,8 +44,8 @@ public class DAQSetup {
 	//latest snapshot parsed and deserialized as json consumable by clients
 	private String latestSnapshot;
 	
-	//lock to prevent starting the same setup twice from the GUI (important as the <start> button will be updated some seconds after the actual setup launch)
-	private boolean launcherLocked;
+	//to prevent starting the same setup twice from the GUI (important as the <start> button will be updated some seconds after the actual setup launch)
+	private Date lastStartCommandTimestamp;
 	
 	public DAQSetup(String name){
 		this.name = name;
@@ -143,13 +145,13 @@ public class DAQSetup {
 	}
 
 
-	public boolean isLauncherLocked() {
-		return launcherLocked;
+	public Date getLastStartCommandTimestamp() {
+		return lastStartCommandTimestamp;
 	}
 
 
-	public void setLauncherLocked(boolean launcherLocked) {
-		this.launcherLocked = launcherLocked;
+	public void setLastStartCommandTimestamp(Date lastStartCommandTimestamp) {
+		this.lastStartCommandTimestamp = lastStartCommandTimestamp;
 	}
 
 }
