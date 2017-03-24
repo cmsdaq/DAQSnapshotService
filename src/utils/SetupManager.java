@@ -250,6 +250,14 @@ public class SetupManager{
 	public synchronized boolean startSetupByName(String name){ //thread safety!
 		logger.info("Starting setup: "+name);
 		boolean success = false;
+		
+		if (this.setups.get(name).isLauncherLocked()){
+			logger.info("Attempt to start a setup seconds after previous start command: aborting");
+			return success;
+		}else{
+			//acquiring setup launcher lock
+			this.setups.get(name).setLauncherLocked(true);
+		}
 
 		String DAQAggregatorConfigFile = this.configFilesDirPath+"/"+name+".DAQAggregator.properties";
 
@@ -271,6 +279,9 @@ public class SetupManager{
 			e.printStackTrace();
 		}
 
+		//releasing setup launcher lock
+		this.setups.get(name).setLauncherLocked(false);
+		
 		return success;
 	}
 

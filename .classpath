@@ -17,6 +17,6 @@
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/afs/cern.ch/user/m/mvougiou/git/DAQAggregator/target/DAQAggregator-1.5.8-pre.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/DAQAggregator-1.5.8pre.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
