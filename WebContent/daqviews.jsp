@@ -11,7 +11,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta http-equiv="refresh" content="1">
+<meta http-equiv="refresh" content="4">
 <title>DAQViews index</title>
 </head>
 

@@ -259,8 +259,10 @@ public class SetupManager{
 		if (this.setups.get(name).getLastStartCommandTimestamp() != null){
 			previousStartCall = this.setups.get(name).getLastStartCommandTimestamp().toString();
 			
-			//aborting if less than 12 seconds (daq setup detection time + GUI refresh rate + epsilon)
-			if ((callerTimestamp.getTime() - this.setups.get(name).getLastStartCommandTimestamp().getTime()) < 12000){
+			long gracePeriod = 15000; //(daq setup detection time + GUI refresh rate + epsilon)
+			
+			//aborting if less than grace period 
+			if ((callerTimestamp.getTime() - this.setups.get(name).getLastStartCommandTimestamp().getTime()) < gracePeriod){
 				acceptLaunch = false;
 			}
 			
