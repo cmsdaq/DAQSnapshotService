@@ -36,7 +36,7 @@ public class SetupManager{
 	private Set<String> revisitedSetups; //contains only setups encountered in current iteration (flushed at each iteration, unlike the map of setups)
 
 	private String startScript; //script to start DAQAggregator processes and catch their pids
-	
+
 	private static final Logger logger = Logger.getLogger(SetupManager.class);
 
 
@@ -215,9 +215,42 @@ public class SetupManager{
 	/**Method for listing of all setups, irrespectively of status*/
 	public List<DAQSetup> getAvailableSetups(){
 		List<DAQSetup> list = new ArrayList<DAQSetup>();
+
+		Set<String> includedSetups = new HashSet<String>();
+
+		//impl. priority
+
 		for (String sName : this.setups.keySet()){
-			list.add(this.setups.get(sName));
+			if (sName.equals("cdaq")){
+				list.add(this.setups.get(sName));
+				includedSetups.add(sName);
+			}else{
+				continue;
+			}
 		}
+
+		for (String sName : this.setups.keySet()){
+			if (includedSetups.contains(sName)){
+				continue;
+			}
+
+			if (sName.contains("daqval")){
+				list.add(this.setups.get(sName));
+				includedSetups.add(sName);
+			}else{
+				continue;
+			}
+		}
+
+		for (String sName : this.setups.keySet()){
+			if (includedSetups.contains(sName)){
+				continue;
+			}else{
+				list.add(this.setups.get(sName));
+				includedSetups.add(sName);
+			}
+		}
+
 		return list;
 	}
 
@@ -249,29 +282,29 @@ public class SetupManager{
 
 	public synchronized boolean startSetupByName(String name, Date callerTimestamp){ //thread safety!
 		logger.info("Starting setup: "+name);
-		
+
 		boolean success = false;
-		
+
 		boolean acceptLaunch = true;
-		
+
 		String previousStartCall;
-		
+
 		if (this.setups.get(name).getLastStartCommandTimestamp() != null){
 			previousStartCall = this.setups.get(name).getLastStartCommandTimestamp().toString();
-			
+
 			long gracePeriod = 15000; //(daq setup detection time + GUI refresh rate + epsilon)
-			
+
 			//aborting if less than grace period 
 			if ((callerTimestamp.getTime() - this.setups.get(name).getLastStartCommandTimestamp().getTime()) < gracePeriod){
 				acceptLaunch = false;
 			}
-			
+
 		}else{
 			previousStartCall = "never";
 		}
-		
+
 		logger.info("-previous start method call at: "+previousStartCall);
-		
+
 		if (!acceptLaunch){
 			logger.info("Attempt to start a setup after a very recent previous start command: aborting...please let the system take its time before you click the start button twice!");
 			return success;
@@ -282,23 +315,23 @@ public class SetupManager{
 		String DAQAggregatorConfigFile = this.configFilesDirPath+"/"+name+".DAQAggregator.properties";
 
 		String DAQAggregatorBinary = Helpers.loadProps(DAQAggregatorConfigFile).getProperty("daqaggregator");
-		
+
 		String DAQAggregatorLogfile = Helpers.loadProps(DAQAggregatorConfigFile).getProperty("logfile");
 
 		try{
 			//start an aggregator process with a given binary and a configuration file
-			
+
 			//wrap in process builder
 			ProcessBuilder builder = new ProcessBuilder("sh", this.startScript, DAQAggregatorBinary, DAQAggregatorConfigFile, name, DAQAggregatorLogfile);
 			builder.start();
-			
+
 			logger.info("Started setup: "+name+" with executable: "+DAQAggregatorBinary+" (should be picked up by front-end in a while)");
 			success = true;
 		}catch(RuntimeException|IOException e){
 			logger.error("Failed to start a setup");
 			e.printStackTrace();
 		}
-		
+
 		return success;
 	}
 
@@ -307,11 +340,11 @@ public class SetupManager{
 		boolean success = false;
 
 		try{
-			
+
 			//wrap in process builder
 			ProcessBuilder builder = new ProcessBuilder("kill", String.valueOf(this.setups.get(name).getLastPid()));
 			builder.start();
-			
+
 			logger.info("Stopped setup: "+name+" (should be picked up by front-end in a while)");
 			success = true;
 		}catch(RuntimeException|IOException e){
