@@ -38,7 +38,8 @@ public class ContextListener implements javax.servlet.ServletContextListener{
 		rootLogger.setLevel(Level.INFO);
 		logger.info("Logging level: "+rootLogger.getLevel().toString());
 
-		String webAppConfigurationPath = "/cmsnfshome0/nfshome0/daqpro/daqexpert/daqview-react-server/daqview-react-server-conf/DAQSnapshotService-server.properties";
+		//For production application, please alter the path below
+		String webAppConfigurationPath = "/cmsnfshome0/nfshome0/daqpro/daqexpert/dev/daqview-react-server/daqview-react-server-conf/DAQSnapshotService-server.properties";
 
 		try{
 
