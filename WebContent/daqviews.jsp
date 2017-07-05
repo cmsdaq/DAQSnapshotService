@@ -23,14 +23,40 @@
 	Properties props = (Properties)getServletContext().getAttribute("properties");
 	
 	String baseLink = props.getProperty("linkToDaqviewApache");
+	
+	String env = props.getProperty("env");
 
 
 %>
-<!-- bgcolor="#DDDDAA" for production page--> 
+
+  <% 
+      if(!"pro".equalsIgnoreCase(env)){
+    %>
+    
+    
 <body bgcolor="#6495ED">
+  <% 
+        } else{
+        	%>
+        	
+        	
+
+<body bgcolor="#DDDDAA">
+        	
+        	<%
+        	
+        }
+    %>
+
+
 <center><h1>Welcome to DAQView instances index</h1></center> 
 
 <br><br>
+
+
+  <% 
+      if(!"pro".equalsIgnoreCase(env)){
+    %>
 
 <!-- remove lines below for production page--> 
 <div><b>Please note that this page is only to be used for development purposes by the DAQ Run Control team.</b>
@@ -38,6 +64,10 @@
 <b>To access the production DAQView controller/index page, please go to: <a href="http://daq-expert.cms:8081/DAQSnapshotService/daqviews.jsp">daq-expert.cms:8081/DAQSnapshotService/daqviews.jsp</a></b>
 </div>
 <!-- remove lines above for production page--> 
+
+  <% 
+        } //end loop over all setups
+    %>
 
 <table width="95%">
 <tr><th>Setup</th><th>Remark</th><th>DAQAggr. status</th><th>Last DAQAggr. pid</th><th>Action</th><th>Snapshot DU<th>Link</th><th>Notes</th></tr>
@@ -141,5 +171,6 @@ for (DAQSetup ds: setupManager.getAvailableSetups()){
 
 </table>
 
+<p>DAQSnapshotService version 1.1.0</p>
 </body>
 </html>

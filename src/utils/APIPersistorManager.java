@@ -129,7 +129,7 @@ public class APIPersistorManager extends PersistorManager {
 			}
 
 			logger.debug("Best file found: " + bestFile + " with time diff: " + diff + "ms.");
-			best = structurePersistor.deserialize(bestFile, PersistenceFormat.SMILE);
+			best = structurePersistor.deserialize(bestFile);
 			return best;
 
 		} catch (IOException e) {
@@ -141,12 +141,6 @@ public class APIPersistorManager extends PersistorManager {
 	}
 
 
-	public DAQ loadSnapshot(String filepath){
-		DAQ ret = null;
-		StructureSerializer structurePersistor = new StructureSerializer();
-		ret = structurePersistor.deserialize(filepath, PersistenceFormat.SMILE);
-		return ret;
-	}
 
 	public String getDefaultSnapshotPersistenceDir(){
 		return snapshotPersistenceDir;

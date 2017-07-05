@@ -19,11 +19,11 @@ import utils.SetupManager;
 
 /**
  * 
- * @author Michail Vougioukas (michail.vougioukas@cern.ch)
- * Discovers latest available setups and sets pointer on DAQSetup objects
+ * @author Michail Vougioukas (michail.vougioukas@cern.ch) Discovers latest available setups and sets pointer on
+ *         DAQSetup objects
  */
 
-public class GetLatestTask implements Runnable{
+public class GetLatestTask implements Runnable {
 
 	SetupManager setupManager;
 
@@ -37,74 +37,83 @@ public class GetLatestTask implements Runnable{
 	public void run() {
 		Date tic = new Date();
 
-		//act upon a copy of setups and only call setup manager objects just to set values, once the discovery jobs have finished
+		// act upon a copy of setups and only call setup manager objects just to set values, once the discovery jobs
+		// have finished
 
 		List<DAQSetup> setups = setupManager.getAvailableSetups();
 
 		Map<String, String> map = new HashMap<String, String>();
 
-		for (DAQSetup setup : setups){
-			String result = findLatestSnapshot(setup.getSnapshotPath());
-			map.put(setup.getName(), result);
+		for (DAQSetup setup : setups) {
+			try {
+				String result = findLatestSnapshot(setup.getSnapshotPath());
+				if (result != null) {
+					map.put(setup.getName(), result);
+				}
+			} catch (Exception e) {
+				logger.warn("Failed finding the latest snapshot for setup: " + setup.getName());
+			}
 		}
 
 		setupManager.updateLatestSnapshot(map);
 
 		Date toc = new Date();
-		logger.debug("Latest setup discovery task for "+map.size()+" setups took "+(toc.getTime()-tic.getTime())+" milliseconds");
+		logger.debug("Latest setup discovery task for " + map.size() + " setups took " + (toc.getTime() - tic.getTime())
+				+ " milliseconds");
 	}
 
 	private String findLatestSnapshot(String setupSnapshotPath) {
-		String path; //path to a smile file
+		String path; // path to a smile file
 		String ret = "";
 
-		try{
-			//implementation based on the temporal ordering of directories and files in the time-based hierarchy
+		try {
+			// implementation based on the temporal ordering of directories and files in the time-based hierarchy
 
 			File root = new File(setupSnapshotPath);
 
-			//case when no snapshots have been produced for this setup
-			if (root.length() == 0){
+			// case when no snapshots have been produced for this setup
+			if (root.length() == 0) {
 				return null;
 			}
 
-			File [] years = root.listFiles(); //dirs of year
+			File[] years = root.listFiles(); // dirs of year
 
-			int maxYear = getMax(years); //position for max year
+			int maxYear = getMax(years); // position for max year
 
-			File [] months = years[maxYear].listFiles();
+			File[] months = years[maxYear].listFiles();
 
-			int maxMonth = getMax(months); //position for max month
+			int maxMonth = getMax(months); // position for max month
 
-			File [] days = months[maxMonth].listFiles();
+			File[] days = months[maxMonth].listFiles();
 
-			int maxDay = getMax(days); //position for max day
+			int maxDay = getMax(days); // position for max day
 
-			File [] hours = days[maxDay].listFiles();
+			File[] hours = days[maxDay].listFiles();
 
-			int maxHour = getMax(hours); //position for max hour
+			int maxHour = getMax(hours); // position for max hour
 
-			File [] snapshots = hours[maxHour].listFiles();
+			File[] snapshots = hours[maxHour].listFiles();
 
-			//if snapshots in this hour were not found (in practice should not occur)
-			if (snapshots.length == 0){
+			// if snapshots in this hour were not found (in practice should not occur)
+			if (snapshots.length == 0) {
 				return null;
 			}
 
-			int maxSnapshotTimestamp = getMax(snapshots); //position for snapshot file at max unix timestamp
+			int maxSnapshotTimestamp = getMax(snapshots); // position for snapshot file at max unix timestamp
 
 			path = snapshots[maxSnapshotTimestamp].getAbsolutePath();
 
-			logger.debug("Newest snapshot in "+setupSnapshotPath+" > "+snapshots[maxSnapshotTimestamp].getName());
-			
-		}catch(RuntimeException e){
+			logger.debug("Newest snapshot in " + setupSnapshotPath + " > " + snapshots[maxSnapshotTimestamp].getName());
+
+		} catch (RuntimeException e) {
 			e.printStackTrace();
-			logger.error("Could not find latest snapshot under root: "+setupSnapshotPath);
+			logger.error("Could not find latest snapshot under root: " + setupSnapshotPath);
 			return null;
 		}
 
-		//deserialization of snapshot
-		ret = deserializeSnapshot(path); //can be null or a deserialized snapshot in json string
+		// deserialization of snapshot
+		ret = deserializeSnapshot(path); // can be null or a deserialized snapshot in json string
+		logger.debug("Deserialized: " + ret.substring(0, 500));
 		return ret;
 
 	}
@@ -112,18 +121,26 @@ public class GetLatestTask implements Runnable{
 	private String deserializeSnapshot(String path) {
 		String json;
 
-		try{
+		try {
+			logger.trace("Deserializing snapshot: " + path);
 			DAQ result = loadSnapshot(path);
+
+			logger.trace("Deserialized snapshot (accessing timestamp): " + result.getLastUpdate());
+
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
 			StructureSerializer ss = new StructureSerializer();
-			
-			//the usual client of getLatest requests needs the most compact possible format
+
+			logger.trace("Serializing snapshot...");
+
+			// the usual client of getLatest requests needs the most compact possible format
 			ss.serialize(result, baos, PersistenceFormat.JSONREFPREFIXEDUGLY);
+
+			logger.trace("Serialized.");
 
 			json = baos.toString(java.nio.charset.StandardCharsets.UTF_8.toString());
 
-		}catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error("Could not deserialize snapshot");
 			return null;
@@ -132,36 +149,36 @@ public class GetLatestTask implements Runnable{
 		return json;
 	}
 
-	private DAQ loadSnapshot(String filepath){
+	private DAQ loadSnapshot(String filepath) {
 		DAQ ret = null;
 		StructureSerializer structurePersistor = new StructureSerializer();
-		ret = structurePersistor.deserialize(filepath, PersistenceFormat.SMILE);
+		ret = structurePersistor.deserialize(filepath);
 		return ret;
 	}
 
 	private int getMax(File[] items) {
-		int posAtMax = 0; //position of File array where the maximum value is
+		int posAtMax = 0; // position of File array where the maximum value is
 		long max = -1;
 
-		//case files (snapshots)
-		if (items[0].getName().contains(".")){
-			for (int i=0;i<items.length;i++){
+		// case files (snapshots)
+		if (items[0].getName().contains(".")) {
+			for (int i = 0; i < items.length; i++) {
 
 				long value = Long.parseLong(items[i].getName().split("\\.")[0]);
 
-				if (value>max){
+				if (value > max) {
 					max = value;
 					posAtMax = i;
 				}
 			}
 		}
-		//case dirs (parent directories of snapshots)
-		else{
-			for (int i=0;i<items.length;i++){
+		// case dirs (parent directories of snapshots)
+		else {
+			for (int i = 0; i < items.length; i++) {
 
 				long value = Long.parseLong(items[i].getName());
 
-				if (value>max){
+				if (value > max) {
 					max = value;
 					posAtMax = i;
 				}
