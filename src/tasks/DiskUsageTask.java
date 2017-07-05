@@ -51,7 +51,10 @@ public class DiskUsageTask implements Runnable{
 	
 	private String queryDiskUsage(String setupSnapshotPath) {
 		String ret;
+		
+		return "Off";
 
+		/* waste of server processor time
 		try {
 			Process p = Runtime.getRuntime().exec("du -sh "+setupSnapshotPath);
 
@@ -80,5 +83,6 @@ public class DiskUsageTask implements Runnable{
 		}
 
 		return ret;
+		*/
 	}
 }
