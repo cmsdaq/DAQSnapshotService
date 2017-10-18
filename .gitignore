@@ -2,3 +2,5 @@
 /target/
 .classpath
 WebContent/WEB-INF/lib/
+.idea
+DAQSnapshotService.iml
