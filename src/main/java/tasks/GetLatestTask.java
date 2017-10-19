@@ -101,6 +101,11 @@ public class GetLatestTask implements Runnable {
 
 			int maxSnapshotTimestamp = getMax(snapshots); // position for snapshot file at max unix timestamp
 
+			// if newest snapshot in this hour was not found (first file discovered is tmp)
+			if (snapshots.length == -1) {
+				return null;
+			}
+
 			path = snapshots[maxSnapshotTimestamp].getAbsolutePath();
 
 			logger.debug("Newest snapshot in " + setupSnapshotPath + " > " + snapshots[maxSnapshotTimestamp].getName());
@@ -164,11 +169,16 @@ public class GetLatestTask implements Runnable {
 		if (items[0].getName().contains(".")) {
 			for (int i = 0; i < items.length; i++) {
 
-				long value = Long.parseLong(items[i].getName().split("\\.")[0]);
+				if(!items[i].getName().endsWith(".tmp")) {
 
-				if (value > max) {
-					max = value;
-					posAtMax = i;
+					long value = Long.parseLong(items[i].getName().split("\\.")[0]);
+
+					if (value > max) {
+						max = value;
+						posAtMax = i;
+					}
+				}else{
+					logger.info("Ignoring tmp file: " + items[i].getName());
 				}
 			}
 		}

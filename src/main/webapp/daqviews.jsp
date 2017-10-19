@@ -171,6 +171,6 @@ for (DAQSetup ds: setupManager.getAvailableSetups()){
 
 </table>
 
-<p>DAQSnapshotService version 1.1.0</p>
+<p>DAQSnapshotService version 1.1.1</p>
 </body>
 </html>
