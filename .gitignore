@@ -4,3 +4,4 @@
 WebContent/WEB-INF/lib/
 .idea
 DAQSnapshotService.iml
+.DS_Store
