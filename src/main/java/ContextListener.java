@@ -12,6 +12,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import tasks.DiskUsageTask;
+import tasks.FileWatcherGetLatestTask;
 import tasks.GetLatestTask;
 import tasks.SetupDetectionTask;
 import utils.Helpers;
@@ -84,7 +85,7 @@ public class ContextListener implements javax.servlet.ServletContextListener {
 			// request
 			int delaySn = 10000; // milliseconds
 			int periodSn = 200; // milliseconds
-			scheduler.scheduleAtFixedRate(new GetLatestTask(setupManager), delaySn, periodSn, TimeUnit.MILLISECONDS);
+			scheduler.scheduleAtFixedRate(new FileWatcherGetLatestTask(setupManager), delaySn, periodSn, TimeUnit.MILLISECONDS);
 			logger.info("Scheduled latest snapshots discovery task: first detection will be launched after " + delaySn
 					+ "ms and every " + periodSn + " afterwards");
 
