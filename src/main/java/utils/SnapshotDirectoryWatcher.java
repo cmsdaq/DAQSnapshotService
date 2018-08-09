@@ -217,7 +217,9 @@ public class SnapshotDirectoryWatcher {
         if (!fileNames.isEmpty()) {
             String[] fileNameArray = fileNames.toArray(new String[fileNames.size()]);
             int maxIndex = Helpers.getMax(fileNameArray);
-            max = fileNameArray[maxIndex];
+            if (maxIndex > -1) {
+                max = fileNameArray[maxIndex];
+            }
         }
 
         return max;
@@ -333,6 +335,9 @@ public class SnapshotDirectoryWatcher {
             return null;
         }
         int maxSnapshotFile = Helpers.getMax(snapshotFiles);
+        if (maxSnapshotFile < 0) {
+            return null;
+        }
         return snapshotFiles[maxSnapshotFile].getAbsolutePath();
     }
 

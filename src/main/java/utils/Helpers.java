@@ -57,7 +57,7 @@ public class Helpers {
     }
 
 	public static int getMax(String[] items) {
-		int posAtMax = 0; // position of array where the maximum value is
+		int posAtMax = -1; // position of array where the maximum value is
 		long max = -1;
 
 		// case files (snapshots)
