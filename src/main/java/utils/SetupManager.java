@@ -14,6 +14,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import websocket.WebSocketServer;
 
 /**
  * 
@@ -47,6 +48,8 @@ public class SetupManager{
 		setups = new HashMap<String, DAQSetup>();
 		maskedSetups = new HashSet<String>();
 		revisitedSetups = new HashSet<String>();
+
+		WebSocketServer.setSetupManager(this);
 	}
 
 	/**Scans for setups which are masked. These setups will be ignored.
@@ -152,7 +155,11 @@ public class SetupManager{
 
 		for (Map.Entry<String, String> e: results.entrySet()){
 			if (e.getValue() != null){
-				this.setups.get(e.getKey()).setLatestSnapshot(e.getValue());
+				String setupName = e.getKey();
+				String snapshot = e.getValue();
+
+				this.setups.get(setupName).setLatestSnapshot(snapshot);
+				WebSocketServer.notifyClients(setupName, snapshot);
 			}
 		}
 	}

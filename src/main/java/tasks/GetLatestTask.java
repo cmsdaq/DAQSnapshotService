@@ -3,11 +3,7 @@ package tasks;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 import org.apache.log4j.Logger;
 
@@ -29,6 +25,10 @@ public class GetLatestTask implements Runnable {
 
 	private static final Logger logger = Logger.getLogger(GetLatestTask.class);
 
+	private Map<String, String> lastKnownSnapshotsBySetupPath = new HashMap<>(20);
+	private Map<String, String> knownSetupPathsBySetupName = new HashMap<>(20);
+	private Set<String> knownSetups = new HashSet<>(20);
+
 	public GetLatestTask(SetupManager setupManager) {
 		this.setupManager = setupManager;
 	}
@@ -44,16 +44,30 @@ public class GetLatestTask implements Runnable {
 
 		Map<String, String> map = new HashMap<String, String>();
 
+		Set<String> newSetups = new HashSet<>();
 		for (DAQSetup setup : setups) {
+			String setupName = setup.getName();
+
+			newSetups.add(setupName);
+
 			try {
 				String result = findLatestSnapshot(setup.getSnapshotPath());
 				if (result != null) {
-					map.put(setup.getName(), result);
+					map.put(setupName, result);
 				}
 			} catch (Exception e) {
 				logger.warn("Failed finding the latest snapshot for setup: " + setup.getName());
 			}
 		}
+
+		for (String knownSetup: this.knownSetups) {
+			if (!newSetups.contains(knownSetup)) {
+				String path = this.knownSetupPathsBySetupName.remove(knownSetup);
+				this.lastKnownSnapshotsBySetupPath.remove(path);
+			}
+		}
+		this.knownSetups.addAll(newSetups);
+
 
 		setupManager.updateLatestSnapshot(map);
 
@@ -107,6 +121,13 @@ public class GetLatestTask implements Runnable {
 			}
 
 			path = snapshots[maxSnapshotTimestamp].getAbsolutePath();
+
+			String lastKnownSnapshotPath = this.lastKnownSnapshotsBySetupPath.get(setupSnapshotPath);
+			if (lastKnownSnapshotPath != null && lastKnownSnapshotPath.equals(path)) {
+				return null;
+			} else {
+				this.lastKnownSnapshotsBySetupPath.put(setupSnapshotPath, path);
+			}
 
 			logger.debug("Newest snapshot in " + setupSnapshotPath + " > " + snapshots[maxSnapshotTimestamp].getName());
 
