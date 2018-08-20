@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>cern.ch</groupId>
     <artifactId>DAQSnapshotService</artifactId>
-    <version>1.1.2</version>
+    <version>1.1.6</version>
     <packaging>war</packaging>
     <name>DAQSnapshotService</name>
     <description>Snapshot provider service for DAQView and friends</description>
@@ -30,7 +30,7 @@
         <dependency>
             <groupId>ch.cern</groupId>
             <artifactId>DAQAggregator</artifactId>
-            <version>1.17.4</version>
+            <version>1.17.12</version>
         </dependency>
 
         <!-- JSP -->
